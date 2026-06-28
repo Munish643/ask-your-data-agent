@@ -1,5 +1,6 @@
 import type {
   AdminStats,
+  AuthSessionResponse,
   AuditLog,
   ChatSession,
   ChatSessionDetail,
@@ -8,6 +9,7 @@ import type {
   DocumentItem,
   UsageLog
 } from "@/types/api";
+import { getAuthHeaders } from "@/lib/auth";
 
 declare global {
   interface Window {
@@ -46,6 +48,7 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
       ...fetchInit,
       headers: {
         ...(fetchInit.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...getAuthHeaders(),
         ...fetchInit.headers
       },
       cache: "no-store",
@@ -67,6 +70,8 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
 }
 
 export const api = {
+  createAuthSession: (payload: { email: string; name?: string; workspace: string; provider: "password" | "sso" }) =>
+    request<AuthSessionResponse>("/api/auth/session", { method: "POST", body: JSON.stringify(payload) }),
   stats: () => request<AdminStats>("/api/admin/stats"),
   documents: () => request<DocumentItem[]>("/api/documents"),
   uploadDocument: (formData: FormData) =>
@@ -90,7 +95,7 @@ export async function streamChat(
 ): Promise<void> {
   const response = await fetch(`${getApiBaseUrl()}/api/chat/stream`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeaders() },
     body: JSON.stringify(input)
   });
   if (!response.ok || !response.body) {

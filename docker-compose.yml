@@ -36,6 +36,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       STORAGE_DIR: /app/storage
+      AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET:-dev-change-me-session-secret}
+      AUTH_TOKEN_TTL_SECONDS: ${AUTH_TOKEN_TTL_SECONDS:-86400}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_GENERATION_MODEL: ${GEMINI_GENERATION_MODEL:-gemini-2.5-flash}
       GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL:-gemini-embedding-001}
@@ -63,6 +65,8 @@ services:
       DATABASE_URL: postgresql+psycopg://app:app@postgres:5432/askdata
       REDIS_URL: redis://redis:6379/0
       STORAGE_DIR: /app/storage
+      AUTH_TOKEN_SECRET: ${AUTH_TOKEN_SECRET:-dev-change-me-session-secret}
+      AUTH_TOKEN_TTL_SECONDS: ${AUTH_TOKEN_TTL_SECONDS:-86400}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_EMBEDDING_MODEL: ${GEMINI_EMBEDDING_MODEL:-gemini-embedding-001}
       GEMINI_EMBEDDING_DIMENSION: ${GEMINI_EMBEDDING_DIMENSION:-768}

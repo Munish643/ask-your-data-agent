@@ -6,6 +6,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import { ArrowRight, BookOpen, Building2, CheckCircle2, LockKeyhole, Mail, ShieldCheck, User } from "lucide-react";
 import { saveMockSession } from "@/lib/auth";
+import { api } from "@/lib/api";
 
 type AuthMode = "login" | "signup";
 
@@ -51,6 +52,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const [email, setEmail] = useState("admin@example.com");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const copy = useMemo(
     () =>
@@ -76,20 +78,39 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     [mode]
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function openWorkspace(provider: "password" | "sso") {
     setIsSubmitting(true);
+    setError(null);
 
     const cleanEmail = email.trim() || "admin@example.com";
-    saveMockSession({
-      email: cleanEmail,
-      name: mode === "signup" && name.trim() ? name.trim() : getNameFromEmail(cleanEmail),
-      workspace: mode === "signup" && workspace.trim() ? workspace.trim() : "Demo workspace"
-    });
+    const cleanName = mode === "signup" && name.trim() ? name.trim() : getNameFromEmail(cleanEmail);
+    const cleanWorkspace = mode === "signup" && workspace.trim() ? workspace.trim() : "Demo workspace";
 
-    window.setTimeout(() => {
+    try {
+      const session = await api.createAuthSession({
+        email: cleanEmail,
+        name: cleanName,
+        workspace: cleanWorkspace,
+        provider
+      });
+      saveMockSession({
+        email: session.email,
+        name: session.name,
+        workspace: session.workspace,
+        token: session.token,
+        provider: session.auth_mode
+      });
       router.push("/dashboard");
-    }, 260);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not open workspace");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    openWorkspace("password");
   }
 
   return (
@@ -160,6 +181,12 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               <p className="mt-3 text-sm leading-6 text-[#4d4d4d]">{copy.body}</p>
             </motion.div>
 
+            {error ? (
+              <motion.div variants={fieldVariants} className="mb-4 rounded-md border border-[#f7d4d6] bg-[#fff5f5] p-3 text-sm text-[#c50000]">
+                {error}
+              </motion.div>
+            ) : null}
+
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "signup" ? (
                 <>
@@ -227,7 +254,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               </motion.label>
 
               <motion.div variants={fieldVariants} className="rounded-md border border-[#ffefcf] bg-[#fff8ea] p-3 text-xs leading-5 text-[#ab570a]">
-                Local demo login only. Production auth should connect this screen to JWT/OIDC, password hashing, sessions, and server-side route protection.
+                Demo auth creates separate backend users by email and workspace, then stores a signed API session token in this browser.
               </motion.div>
 
               <motion.button
@@ -241,6 +268,20 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               >
                 {isSubmitting ? "Opening workspace..." : copy.action}
                 <ArrowRight size={17} />
+              </motion.button>
+
+              <motion.button
+                data-anime-hover
+                variants={fieldVariants}
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.99 }}
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => openWorkspace("sso")}
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-[#d3e5ff] bg-[#eef6ff] px-4 text-sm font-semibold text-[#0761d1] transition hover:border-[#9bc7ff] hover:bg-[#e3f0ff] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Continue with SSO
+                <ShieldCheck size={17} />
               </motion.button>
             </form>
 

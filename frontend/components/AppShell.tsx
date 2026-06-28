@@ -233,7 +233,7 @@ export function AppShell({
             {session ? session.name : "Mock auth active"}
           </div>
           <p className="font-mono text-xs leading-5 text-[#888888]">
-            {session ? `${session.email} scoped to ${session.workspace}.` : "admin@example.com scoped to demo."}
+            {session ? `${session.email} via ${session.provider.toUpperCase()} scoped to ${session.workspace}.` : "admin@example.com scoped to demo."}
           </p>
           {session ? (
             <button

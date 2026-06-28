@@ -79,6 +79,17 @@ export interface UsageLog {
   created_at: string;
 }
 
+export interface AuthSessionResponse {
+  token: string;
+  tenant_id: string;
+  user_id: string;
+  email: string;
+  name: string;
+  role: string;
+  workspace: string;
+  auth_mode: "password" | "sso";
+}
+
 export type ChatStreamEvent =
   | { type: "status"; message: string }
   | ({ type: "source" } & SourceEvent)

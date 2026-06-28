@@ -2,6 +2,8 @@ export type MockSession = {
   email: string;
   name: string;
   workspace: string;
+  token: string;
+  provider: "password" | "sso";
   createdAt: string;
 };
 
@@ -14,7 +16,12 @@ function parseSession(value: string | null): MockSession | null {
 
   try {
     const session = JSON.parse(value) as Partial<MockSession>;
-    if (typeof session.email !== "string" || typeof session.name !== "string" || typeof session.workspace !== "string") {
+    if (
+      typeof session.email !== "string" ||
+      typeof session.name !== "string" ||
+      typeof session.workspace !== "string" ||
+      typeof session.token !== "string"
+    ) {
       return null;
     }
 
@@ -22,6 +29,8 @@ function parseSession(value: string | null): MockSession | null {
       email: session.email,
       name: session.name,
       workspace: session.workspace,
+      token: session.token,
+      provider: session.provider === "sso" ? "sso" : "password",
       createdAt: typeof session.createdAt === "string" ? session.createdAt : new Date().toISOString()
     };
   } catch {
@@ -53,6 +62,8 @@ export function saveMockSession(session: Omit<MockSession, "createdAt">) {
         email: session.email,
         name: session.name,
         workspace: session.workspace,
+        token: session.token,
+        provider: session.provider,
         createdAt: new Date().toISOString()
       })
     );
@@ -71,4 +82,15 @@ export function clearMockSession() {
   } catch {
     // Ignore storage failures.
   }
+}
+
+export function getAuthHeaders(): Record<string, string> {
+  const session = loadMockSession();
+  if (!session) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${session.token}`
+  };
 }

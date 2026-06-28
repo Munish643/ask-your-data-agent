@@ -10,6 +10,23 @@ from app.models.entities import Connector, Tenant, User
 CONNECTOR_PROVIDERS = ["google_drive", "slack", "notion", "sharepoint", "website"]
 
 
+def ensure_connector_seed(db: Session, *, tenant_id: UUID, connected_by: UUID | None = None) -> None:
+    for provider in CONNECTOR_PROVIDERS:
+        exists = db.scalar(
+            select(Connector).where(Connector.tenant_id == tenant_id, Connector.provider == provider)
+        )
+        if not exists:
+            db.add(
+                Connector(
+                    tenant_id=tenant_id,
+                    provider=provider,
+                    status="coming_soon",
+                    connected_by=connected_by,
+                    config={"label": provider.replace("_", " ").title(), "mode": "placeholder"},
+                )
+            )
+
+
 def ensure_demo_seed(db: Session) -> None:
     tenant_id = UUID(settings.dev_tenant_id)
     user_id = UUID(settings.dev_user_id)
@@ -32,20 +49,6 @@ def ensure_demo_seed(db: Session) -> None:
         db.add(user)
 
     db.flush()
-
-    for provider in CONNECTOR_PROVIDERS:
-        exists = db.scalar(
-            select(Connector).where(Connector.tenant_id == tenant_id, Connector.provider == provider)
-        )
-        if not exists:
-            db.add(
-                Connector(
-                    tenant_id=tenant_id,
-                    provider=provider,
-                    status="coming_soon",
-                    connected_by=user_id,
-                    config={"label": provider.replace("_", " ").title(), "mode": "placeholder"},
-                )
-            )
+    ensure_connector_seed(db, tenant_id=tenant_id, connected_by=user_id)
 
     db.commit()
