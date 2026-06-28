@@ -63,7 +63,7 @@ export default function LandingPage() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <main className="min-h-screen bg-[#070A12] text-white">
+    <main data-anime-page className="min-h-screen bg-[#070A12] text-white">
       <section
         className="relative min-h-[92vh] overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: "url('/images/hero-knowledge-graph.png')" }}
@@ -81,13 +81,14 @@ export default function LandingPage() {
           transition={{ duration: 0.28, ease: "easeOut" }}
           className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-5 py-5 md:px-10"
         >
-          <Link href="/" className="inline-flex items-center gap-3 rounded-md border border-white/12 bg-white/8 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-white/12">
+          <Link href="/" data-anime-hover className="inline-flex items-center gap-3 rounded-md border border-white/12 bg-white/8 px-3 py-2 text-sm font-medium text-white backdrop-blur transition hover:bg-white/12">
             <BookOpen size={18} />
             Ask-Your-Data
           </Link>
           <div className="flex items-center gap-2">
             <Link
               href="/login"
+              data-anime-hover
               className="inline-flex h-10 items-center gap-2 rounded-md border border-white/15 bg-white/5 px-3 text-sm font-semibold text-slate-100 backdrop-blur transition hover:bg-white/10"
             >
               <LogIn size={16} />
@@ -95,6 +96,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup"
+              data-anime-hover
               className="inline-flex h-10 items-center gap-2 rounded-md bg-white px-3 text-sm font-semibold text-[#171717] transition hover:bg-slate-100"
             >
               <UserPlus size={16} />
@@ -104,7 +106,7 @@ export default function LandingPage() {
         </motion.nav>
 
         <div className="relative z-10 flex min-h-[92vh] items-center px-5 py-16 md:px-10">
-          <motion.div className="max-w-4xl" variants={container} initial="hidden" animate="show">
+          <motion.div data-anime-reveal className="max-w-4xl" variants={container} initial="hidden" animate="show">
             <motion.div
               variants={item}
               className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#f97316]/30 bg-[#f97316]/10 px-3 py-1 text-sm text-[#fdba74]"
@@ -147,6 +149,7 @@ export default function LandingPage() {
               {stats.map((stat) => (
                 <motion.div
                   key={stat.label}
+                  data-anime-hover
                   whileHover={{ y: -4 }}
                   className="rounded-lg border border-white/10 bg-white/[0.06] p-4 backdrop-blur"
                 >
@@ -167,6 +170,8 @@ export default function LandingPage() {
             return (
               <motion.div
                 key={promise.label}
+                data-anime-reveal
+                data-anime-hover
                 variants={item}
                 whileHover={{ y: -4 }}
                 className="rounded-lg border border-[#232A37] bg-[#10151F] p-4"
@@ -196,6 +201,8 @@ export default function LandingPage() {
             {flow.map((step, index) => (
               <motion.div
                 key={step.title}
+                data-anime-reveal
+                data-anime-hover
                 variants={item}
                 whileHover={{ y: -5 }}
                 className="rounded-lg border border-[#ebebeb] bg-white p-5 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]"
@@ -220,10 +227,10 @@ export default function LandingPage() {
               The app includes the operational pieces you need before connecting real identity, hosted databases, and managed storage.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/knowledge-base" className="inline-flex h-10 items-center rounded-md bg-[#171717] px-4 text-sm font-medium text-white">
+              <Link href="/knowledge-base" data-anime-hover className="inline-flex h-10 items-center rounded-md bg-[#171717] px-4 text-sm font-medium text-white">
                 Manage Knowledge
               </Link>
-              <Link href="/admin" className="inline-flex h-10 items-center rounded-md border border-[#ebebeb] bg-white px-4 text-sm font-medium text-[#171717]">
+              <Link href="/admin" data-anime-hover className="inline-flex h-10 items-center rounded-md border border-[#ebebeb] bg-white px-4 text-sm font-medium text-[#171717]">
                 View Admin
               </Link>
             </div>
@@ -237,7 +244,7 @@ export default function LandingPage() {
             viewport={{ once: true, margin: "-100px" }}
           >
             {controls.map((control) => (
-              <motion.div key={control} variants={item} className="flex items-start gap-3 rounded-lg border border-[#ebebeb] bg-[#fafafa] p-4">
+              <motion.div key={control} data-anime-reveal data-anime-hover variants={item} className="flex items-start gap-3 rounded-lg border border-[#ebebeb] bg-[#fafafa] p-4">
                 <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#0070f3]" />
                 <span className="text-sm leading-6 text-[#4d4d4d]">{control}</span>
               </motion.div>
@@ -248,6 +255,7 @@ export default function LandingPage() {
 
       <section className="border-t border-[#ebebeb] bg-[#fafafa] px-5 py-12 text-[#171717] md:px-10">
         <motion.div
+          data-anime-reveal
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -262,7 +270,7 @@ export default function LandingPage() {
               Upload multiple files, re-index with Gemini embeddings, and ask questions against tenant-scoped sources.
             </p>
           </div>
-          <Link href="/signup" className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-[#0070f3] px-4 text-sm font-medium text-white">
+          <Link href="/signup" data-anime-hover className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-md bg-[#0070f3] px-4 text-sm font-medium text-white">
             Create account
             <ArrowRight size={16} />
           </Link>

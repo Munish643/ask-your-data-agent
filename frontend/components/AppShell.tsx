@@ -141,7 +141,7 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-[#171717]">
+    <div data-anime-page className="min-h-screen bg-[#fafafa] text-[#171717]">
       {pendingHref ? (
         <div className="fixed left-0 right-0 top-0 z-50 h-0.5 overflow-hidden bg-[#ebebeb]" role="status" aria-label="Loading page">
           <div className="route-progress-bar h-full bg-[#0070f3]" />
@@ -155,6 +155,7 @@ export function AppShell({
         />
       ) : null}
       <aside
+        data-anime-reveal
         className={clsx(
           "fixed inset-y-0 left-0 z-30 border-r border-[#ebebeb] bg-white px-3 py-4 transition-all duration-200",
           collapsed ? "w-72 lg:w-16" : "w-72",
@@ -164,6 +165,7 @@ export function AppShell({
         <div className={clsx("mb-8 flex items-center gap-2", collapsed ? "lg:flex-col" : "justify-between")}>
           <Link
             href="/"
+            data-anime-hover
             className={clsx(
               "flex min-w-0 items-center gap-3 px-2",
               collapsed && "lg:h-11 lg:w-11 lg:justify-center lg:px-0"
@@ -179,6 +181,7 @@ export function AppShell({
           </Link>
           <button
             onClick={toggleCollapsed}
+            data-anime-hover
             className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#ebebeb] bg-white text-[#4d4d4d] transition hover:bg-[#f5f5f5] lg:inline-flex"
             title={collapsed ? "Open sidebar" : "Close sidebar"}
           >
@@ -186,6 +189,7 @@ export function AppShell({
           </button>
           <button
             onClick={() => setMobileOpen(false)}
+            data-anime-hover
             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#ebebeb] text-[#4d4d4d] hover:bg-[#f5f5f5] lg:hidden"
             title="Close sidebar"
           >
@@ -201,6 +205,7 @@ export function AppShell({
                 key={item.label}
                 href={item.href}
                 prefetch
+                data-anime-hover
                 className={clsx(
                   "group relative flex h-10 items-center gap-3 rounded-md px-3 text-sm transition",
                   collapsed && "lg:justify-center lg:px-0",
@@ -233,6 +238,7 @@ export function AppShell({
           {session ? (
             <button
               onClick={handleLogout}
+              data-anime-hover
               className="mt-3 inline-flex h-8 w-full items-center justify-center gap-2 rounded-md border border-[#ebebeb] bg-white text-xs font-medium text-[#4d4d4d] transition hover:bg-[#f5f5f5] hover:text-[#171717]"
             >
               <LogOut size={14} />
@@ -243,6 +249,7 @@ export function AppShell({
       </aside>
       <main className={clsx("transition-all duration-200", collapsed ? "lg:pl-16" : "lg:pl-72")}>
         <motion.header
+          data-anime-reveal
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
@@ -252,6 +259,7 @@ export function AppShell({
             <div className="flex min-w-0 items-center gap-3">
               <button
                 onClick={() => setMobileOpen(true)}
+                data-anime-hover
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[#ebebeb] text-[#4d4d4d] hover:bg-[#f5f5f5] lg:hidden"
                 title="Open sidebar"
               >
@@ -265,6 +273,7 @@ export function AppShell({
             <div className="flex shrink-0 items-center gap-2">
               <button
                 onClick={toggleTheme}
+                data-anime-hover
                 className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#ebebeb] bg-white text-[#4d4d4d] transition hover:bg-[#f5f5f5] hover:text-[#171717]"
                 title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
@@ -278,6 +287,7 @@ export function AppShell({
           </div>
         </motion.header>
         <motion.div
+          data-anime-reveal
           key={pathname}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}

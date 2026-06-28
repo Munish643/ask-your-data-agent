@@ -6,6 +6,8 @@ import { motion } from "motion/react";
 export function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: LucideIcon }) {
   return (
     <motion.div
+      data-anime-reveal
+      data-anime-hover
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -3 }}

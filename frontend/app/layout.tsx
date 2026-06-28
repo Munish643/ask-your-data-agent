@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AnimeProvider } from "@/components/AnimeProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <script src="/runtime-config.js" />
       </head>
-      <body>{children}</body>
+      <body>
+        <AnimeProvider>{children}</AnimeProvider>
+      </body>
     </html>
   );
 }

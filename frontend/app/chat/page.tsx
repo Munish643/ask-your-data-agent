@@ -277,6 +277,7 @@ export default function ChatPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setHistoryOpen((current) => !current)}
+                data-anime-hover
                 className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-transparent text-[#4d4d4d] transition hover:border-[#ebebeb] hover:bg-[#fafafa] hover:text-[#171717]"
                 title={historyOpen ? "Close chats" : "Open chats"}
               >
@@ -284,6 +285,7 @@ export default function ChatPage() {
               </button>
               <button
                 onClick={startNewChat}
+                data-anime-hover
                 className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
               >
                 <MessageSquarePlus size={17} />
@@ -292,6 +294,7 @@ export default function ChatPage() {
             </div>
             <button
               onClick={() => setSourcesOpen((current) => !current)}
+              data-anime-hover
               className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
             >
               {sourcesOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
@@ -356,6 +359,7 @@ export default function ChatPage() {
                   placeholder="Message Ask-Your-Data"
                 />
                 <button
+                  data-anime-hover
                   type="submit"
                   disabled={isStreaming || !query.trim()}
                   className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#171717] text-white transition hover:bg-black disabled:cursor-not-allowed disabled:bg-[#ebebeb] disabled:text-[#888888]"
@@ -417,10 +421,11 @@ function HistoryPanel({
         {sessions.length ? (
           <div className="space-y-1.5">
             {sessions.map((session) => (
-              <button
-                key={session.id}
-                onClick={() => onSelect(session.id)}
-                className={clsx(
+            <button
+              key={session.id}
+              onClick={() => onSelect(session.id)}
+              data-anime-hover
+              className={clsx(
                   "block w-full rounded-md px-3 py-3 text-left transition",
                   activeSessionId === session.id ? "bg-[#f5f5f5] text-[#171717]" : "text-[#4d4d4d] hover:bg-[#fafafa] hover:text-[#171717]"
                 )}
@@ -467,7 +472,7 @@ function MessageRow({
 
   if (!isAssistant) {
     return (
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="flex justify-end">
+      <motion.div data-anime-reveal initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="flex justify-end">
         <div className="group max-w-[82%] md:max-w-[72%]">
           {isEditing ? (
             <div className="rounded-lg border border-[#ebebeb] bg-white p-2 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]">
@@ -502,6 +507,7 @@ function MessageRow({
               {canEdit ? (
                 <button
                   onClick={onEdit}
+                  data-anime-hover
                   className="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#ebebeb] bg-white text-[#4d4d4d] opacity-100 transition hover:bg-[#f5f5f5] hover:text-[#171717] md:opacity-0 md:group-hover:opacity-100"
                   title="Edit message"
                 >
@@ -519,7 +525,7 @@ function MessageRow({
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="grid grid-cols-[34px_minmax(0,1fr)] gap-4">
+    <motion.div data-anime-reveal initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="grid grid-cols-[34px_minmax(0,1fr)] gap-4">
       <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-[#ebebeb] bg-white text-[#171717]">
         <Bot size={17} />
       </div>
@@ -547,6 +553,7 @@ function FollowUpChips({ prompts, onAsk, disabled }: { prompts: string[]; onAsk:
           key={prompt}
           onClick={() => onAsk(prompt)}
           disabled={disabled}
+          data-anime-hover
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
           className="rounded-full border border-[#ebebeb] bg-white px-3 py-2 text-sm text-[#4d4d4d] transition hover:border-[#a1a1a1] hover:bg-[#f5f5f5] hover:text-[#171717] disabled:cursor-not-allowed disabled:opacity-50"

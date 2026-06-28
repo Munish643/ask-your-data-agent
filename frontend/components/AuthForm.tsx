@@ -93,7 +93,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   }
 
   return (
-    <main className="min-h-screen bg-[#fafafa] text-[#171717]">
+    <main data-anime-page className="min-h-screen bg-[#fafafa] text-[#171717]">
       <div className="grid min-h-screen lg:grid-cols-[0.95fr_1.05fr]">
         <section
           className="relative hidden overflow-hidden bg-cover bg-center px-10 py-8 text-white lg:block"
@@ -101,7 +101,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         >
           <div className="absolute inset-0 bg-[linear-gradient(110deg,rgba(7,10,18,0.98)_0%,rgba(7,10,18,0.86)_48%,rgba(7,10,18,0.46)_100%)]" />
           <div className="relative z-10 flex h-full flex-col">
-            <Link href="/" className="inline-flex w-fit items-center gap-3 rounded-md border border-white/12 bg-white/8 px-3 py-2 text-sm font-medium text-white backdrop-blur">
+            <Link href="/" data-anime-hover className="inline-flex w-fit items-center gap-3 rounded-md border border-white/12 bg-white/8 px-3 py-2 text-sm font-medium text-white backdrop-blur">
               <BookOpen size={18} />
               Ask-Your-Data
             </Link>
@@ -126,6 +126,8 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                 {proofPoints.map((point) => (
                   <motion.div
                     key={point}
+                    data-anime-reveal
+                    data-anime-hover
                     className="flex items-center gap-3 rounded-lg border border-white/10 bg-white/[0.06] p-3 text-sm text-slate-100 backdrop-blur"
                     initial={reduceMotion ? false : { opacity: 0, x: -10 }}
                     animate={reduceMotion ? undefined : { opacity: 1, x: 0 }}
@@ -142,13 +144,14 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
         <section className="flex min-h-screen items-center justify-center px-5 py-8 md:px-8">
           <motion.div
+            data-anime-reveal
             variants={formVariants}
             initial="hidden"
             animate="show"
             className="w-full max-w-md rounded-lg border border-[#ebebeb] bg-white p-6 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]"
           >
             <motion.div variants={fieldVariants} className="mb-8">
-              <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-[#4d4d4d] transition hover:text-[#171717] lg:hidden">
+              <Link href="/" data-anime-hover className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-[#4d4d4d] transition hover:text-[#171717] lg:hidden">
                 <BookOpen size={18} />
                 Ask-Your-Data
               </Link>
@@ -228,6 +231,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               </motion.div>
 
               <motion.button
+                data-anime-hover
                 variants={fieldVariants}
                 whileHover={{ y: -1 }}
                 whileTap={{ scale: 0.99 }}
@@ -242,7 +246,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
             <motion.div variants={fieldVariants} className="mt-6 flex items-center justify-center gap-2 text-sm text-[#4d4d4d]">
               <span>{copy.switchText}</span>
-              <Link href={copy.switchHref} className="font-medium text-[#0070f3] transition hover:text-[#0761d1]">
+              <Link href={copy.switchHref} data-anime-hover className="font-medium text-[#0070f3] transition hover:text-[#0761d1]">
                 {copy.switchLabel}
               </Link>
             </motion.div>
