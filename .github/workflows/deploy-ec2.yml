@@ -68,12 +68,25 @@ jobs:
             git reset --hard origin/main
 
             if docker info >/dev/null 2>&1; then
-              docker compose up --build -d --remove-orphans
-              docker compose ps
+              compose() { docker compose --project-name ask-your-data-agent "$@"; }
+              docker_cmd() { docker "$@"; }
+            else
+              compose() { sudo docker compose --project-name ask-your-data-agent "$@"; }
+              docker_cmd() { sudo docker "$@"; }
+            fi
+
+            compose down --remove-orphans || true
+            stale_containers="$(docker_cmd ps -aq --filter "name=ask-your-data-agent" || true)"
+            if [ -n "$stale_containers" ]; then
+              docker_cmd rm -f $stale_containers
+            fi
+
+            compose up --build -d --remove-orphans
+            compose ps
+
+            if docker info >/dev/null 2>&1; then
               docker image prune -f
             else
-              sudo docker compose up --build -d --remove-orphans
-              sudo docker compose ps
               sudo docker image prune -f
             fi
           EOF

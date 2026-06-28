@@ -1,3 +1,5 @@
+name: ask-your-data-agent
+
 x-service-defaults: &service-defaults
   restart: unless-stopped
   logging:
