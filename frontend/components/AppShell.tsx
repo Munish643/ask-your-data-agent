@@ -90,7 +90,11 @@ export function AppShell({
     const nextTheme = getPreferredTheme();
     setTheme(nextTheme);
     applyTheme(nextTheme);
-    setSession(loadMockSession());
+    const nextSession = loadMockSession();
+    setSession(nextSession);
+    if (!nextSession) {
+      router.replace("/login");
+    }
   }, []);
 
   useEffect(() => {
@@ -157,12 +161,12 @@ export function AppShell({
       <aside
         data-anime-reveal
         className={clsx(
-          "fixed inset-y-0 left-0 z-30 border-r border-[#ebebeb] bg-white px-3 py-4 transition-all duration-200",
-          collapsed ? "w-72 lg:w-16" : "w-72",
+          "fixed inset-y-0 left-0 z-30 flex h-dvh flex-col border-r border-[#ebebeb] bg-white px-3 py-4 transition-all duration-200",
+          collapsed ? "w-[min(20rem,calc(100vw-1rem))] lg:w-16" : "w-[min(20rem,calc(100vw-1rem))] lg:w-72",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className={clsx("mb-8 flex items-center gap-2", collapsed ? "lg:flex-col" : "justify-between")}>
+        <div className={clsx("mb-6 flex shrink-0 items-center gap-2 sm:mb-8", collapsed ? "lg:flex-col" : "justify-between")}>
           <Link
             href="/"
             data-anime-hover
@@ -196,7 +200,7 @@ export function AppShell({
             <X size={18} />
           </button>
         </div>
-        <nav className="space-y-1">
+        <nav className="thin-scrollbar flex-1 space-y-1 overflow-y-auto pb-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -227,7 +231,7 @@ export function AppShell({
             );
           })}
         </nav>
-        <div className={clsx("absolute bottom-4 left-3 right-3 rounded-md border border-[#ebebeb] bg-[#fafafa] p-3", collapsed && "lg:hidden")}>
+        <div className={clsx("mt-3 shrink-0 rounded-md border border-[#ebebeb] bg-[#fafafa] p-3", collapsed && "lg:hidden")}>
           <div className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[#171717]">
             <Activity size={15} className="text-[#0070f3]" />
             {session ? session.name : "Mock auth active"}
@@ -253,7 +257,7 @@ export function AppShell({
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.18, ease: "easeOut" }}
-          className="sticky top-0 z-10 border-b border-[#ebebeb] bg-white/95 px-4 py-4 backdrop-blur md:px-8"
+          className="sticky top-0 z-10 border-b border-[#ebebeb] bg-white/95 px-3 py-3 backdrop-blur sm:px-4 md:px-8 md:py-4"
         >
           <div className="mx-auto flex max-w-7xl items-center justify-between">
             <div className="flex min-w-0 items-center gap-3">
@@ -266,8 +270,8 @@ export function AppShell({
                 <Menu size={19} />
               </button>
               <div className="min-w-0">
-                <h1 className="text-xl font-semibold text-[#171717] md:text-2xl">{title}</h1>
-                {subtitle ? <p className="mt-1 text-sm text-[#4d4d4d]">{subtitle}</p> : null}
+                <h1 className="truncate text-lg font-semibold text-[#171717] sm:text-xl md:text-2xl">{title}</h1>
+                {subtitle ? <p className="mt-1 hidden max-w-[64vw] truncate text-sm text-[#4d4d4d] sm:block">{subtitle}</p> : null}
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
@@ -292,7 +296,7 @@ export function AppShell({
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className={clsx(contentClassName ?? "mx-auto max-w-7xl px-4 py-6 md:px-8")}
+          className={clsx(contentClassName ?? "mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5 md:px-8 md:py-6")}
         >
           {children}
         </motion.div>

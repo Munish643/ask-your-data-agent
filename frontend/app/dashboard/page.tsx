@@ -39,7 +39,7 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-2">
+      <div className="mt-5 grid gap-5 sm:mt-6 sm:gap-6 xl:grid-cols-2">
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-[#171717]">Recent documents</h2>
@@ -51,7 +51,7 @@ export default function DashboardPage() {
               {stats?.recent_documents.length ? (
               <div className="divide-y divide-[#ebebeb]">
                 {stats.recent_documents.map((document) => (
-                  <div key={document.id} className="flex items-center justify-between gap-4 p-4">
+                  <div key={document.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium text-[#171717]">{document.title}</div>
                       <div className="mt-1 truncate font-mono text-xs text-[#888888]">{document.file_name}</div>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
               <div className="divide-y divide-[#ebebeb]">
                 {stats.recent_sessions.map((session) => (
                   <div key={session.id} className="p-4">
-                    <div className="text-sm font-medium text-[#171717]">{session.title}</div>
+                    <div className="line-clamp-2 text-sm font-medium text-[#171717]">{session.title}</div>
                     <div className="mt-1 font-mono text-xs text-[#888888]">{new Date(session.updated_at).toLocaleString()}</div>
                   </div>
                 ))}

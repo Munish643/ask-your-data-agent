@@ -49,8 +49,8 @@ export default function ChatPage() {
   const [sources, setSources] = useState<SourceEvent[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [historyOpen, setHistoryOpen] = useState(true);
-  const [sourcesOpen, setSourcesOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [activeAssistantId, setActiveAssistantId] = useState<string | null>(null);
   const [streamCompletionTick, setStreamCompletionTick] = useState(0);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -61,6 +61,11 @@ export default function ChatPage() {
 
   useEffect(() => {
     loadSessions().catch((err: Error) => setError(err.message));
+  }, []);
+
+  useEffect(() => {
+    setHistoryOpen(window.matchMedia("(min-width: 1024px)").matches);
+    setSourcesOpen(window.matchMedia("(min-width: 1280px)").matches);
   }, []);
 
   useEffect(() => {
@@ -262,7 +267,21 @@ export default function ChatPage() {
       subtitle="Ask questions and receive permission-filtered, source-backed answers."
       contentClassName="max-w-none px-0 py-0 md:px-0"
     >
-      <div className="flex h-[calc(100vh-82px)] min-h-[680px] overflow-hidden bg-[#fafafa]">
+      <div className="flex h-[calc(100dvh-65px)] min-h-0 overflow-hidden bg-[#fafafa] md:h-[calc(100dvh-82px)]">
+        {historyOpen ? (
+          <button
+            className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm lg:hidden"
+            onClick={() => setHistoryOpen(false)}
+            aria-label="Close chats backdrop"
+          />
+        ) : null}
+        {sourcesOpen ? (
+          <button
+            className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm xl:hidden"
+            onClick={() => setSourcesOpen(false)}
+            aria-label="Close sources backdrop"
+          />
+        ) : null}
         <HistoryPanel
           open={historyOpen}
           sessions={sessions}
@@ -273,7 +292,7 @@ export default function ChatPage() {
         />
 
         <section className="flex min-w-0 flex-1 flex-col">
-          <div className="flex h-14 shrink-0 items-center justify-between border-b border-[#ebebeb] bg-white px-3 md:px-5">
+          <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[#ebebeb] bg-white px-2 sm:px-3 md:px-5">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setHistoryOpen((current) => !current)}
@@ -289,7 +308,7 @@ export default function ChatPage() {
                 className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
               >
                 <MessageSquarePlus size={17} />
-                New chat
+                <span className="hidden sm:inline">New chat</span>
               </button>
             </div>
             <button
@@ -298,26 +317,26 @@ export default function ChatPage() {
               className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
             >
               {sourcesOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
-              Sources
+              <span className="hidden sm:inline">Sources</span>
               {sources.length ? <span className="rounded-full bg-[#d3e5ff] px-2 py-0.5 font-mono text-xs text-[#0761d1]">{sources.length}</span> : null}
             </button>
           </div>
 
           <div className="thin-scrollbar flex-1 overflow-y-auto">
-            <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-4 py-6 md:px-8">
+            <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-3 py-4 sm:px-4 sm:py-6 md:px-8">
               {messages.length === 0 ? (
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-lg border border-[#ebebeb] bg-white text-[#171717] shadow-[0_1px_1px_#00000008,0_2px_2px_#0000000a]">
                     <Sparkles size={26} />
                   </div>
-                  <h2 className="text-2xl font-semibold text-[#171717] md:text-3xl">What do you want to know?</h2>
+                  <h2 className="text-xl font-semibold text-[#171717] sm:text-2xl md:text-3xl">What do you want to know?</h2>
                   <p className="mt-3 max-w-xl text-sm leading-6 text-[#4d4d4d]">
                     Ask from your indexed company knowledge base and the answer will stream here with sources.
                   </p>
                   <FollowUpChips prompts={EMPTY_PROMPTS} onAsk={(prompt) => void sendMessage(prompt)} disabled={isStreaming} />
                 </div>
               ) : (
-                <div className="space-y-8 pb-4">
+                <div className="space-y-6 pb-4 sm:space-y-8">
                   {messages.map((message) => (
                     <MessageRow
                       key={message.id}
@@ -347,15 +366,15 @@ export default function ChatPage() {
             </div>
           ) : null}
 
-          <form onSubmit={submit} className="shrink-0 border-t border-[#ebebeb] bg-[#fafafa] px-3 py-4 md:px-6">
+          <form onSubmit={submit} className="shrink-0 border-t border-[#ebebeb] bg-[#fafafa] px-2 py-3 sm:px-3 sm:py-4 md:px-6">
             <div className="mx-auto max-w-4xl">
-              <div className="flex items-end gap-3 rounded-lg border border-[#ebebeb] bg-white p-2 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] focus-within:border-[#a1a1a1]">
+              <div className="flex items-end gap-2 rounded-lg border border-[#ebebeb] bg-white p-2 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] focus-within:border-[#a1a1a1] sm:gap-3">
                 <textarea
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   onKeyDown={handleComposerKeyDown}
                   rows={1}
-                  className="max-h-44 min-h-11 flex-1 resize-none bg-transparent px-3 py-3 text-[15px] leading-6 text-[#171717] outline-none placeholder:text-[#888888]"
+                  className="max-h-44 min-h-11 flex-1 resize-none bg-transparent px-2 py-3 text-base leading-6 text-[#171717] outline-none placeholder:text-[#888888] sm:px-3 sm:text-[15px]"
                   placeholder="Message Ask-Your-Data"
                 />
                 <button
@@ -368,7 +387,7 @@ export default function ChatPage() {
                   <Send size={18} />
                 </button>
               </div>
-              <div className="mt-2 px-1 font-mono text-[11px] text-[#888888]">Enter sends. Shift + Enter adds a new line.</div>
+              <div className="mt-2 hidden px-1 font-mono text-[11px] text-[#888888] sm:block">Enter sends. Shift + Enter adds a new line.</div>
             </div>
           </form>
         </section>
@@ -397,7 +416,7 @@ function HistoryPanel({
   if (!open) return null;
 
   return (
-    <aside className="hidden w-80 shrink-0 flex-col border-r border-[#ebebeb] bg-white lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 flex w-[min(22rem,calc(100vw-1rem))] shrink-0 flex-col border-r border-[#ebebeb] bg-white shadow-[0_18px_60px_#0000002b] lg:static lg:z-auto lg:w-80 lg:shadow-none">
       <div className="flex h-14 items-center justify-between border-b border-[#ebebeb] px-4">
         <h2 className="text-sm font-semibold text-[#171717]">Chats</h2>
         <div className="flex items-center gap-1">
@@ -473,7 +492,7 @@ function MessageRow({
   if (!isAssistant) {
     return (
       <motion.div data-anime-reveal initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="flex justify-end">
-        <div className="group max-w-[82%] md:max-w-[72%]">
+        <div className="group max-w-[92%] sm:max-w-[82%] md:max-w-[72%]">
           {isEditing ? (
             <div className="rounded-lg border border-[#ebebeb] bg-white p-2 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]">
               <textarea
@@ -514,7 +533,7 @@ function MessageRow({
                   <Pencil size={14} />
                 </button>
               ) : null}
-              <div className="rounded-lg bg-[#171717] px-4 py-3 text-[15px] leading-7 text-white">
+              <div className="break-words rounded-lg bg-[#171717] px-3 py-2.5 text-sm leading-6 text-white sm:px-4 sm:py-3 sm:text-[15px] sm:leading-7">
                 {message.content}
               </div>
             </div>
@@ -525,11 +544,11 @@ function MessageRow({
   }
 
   return (
-    <motion.div data-anime-reveal initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="grid grid-cols-[34px_minmax(0,1fr)] gap-4">
-      <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full border border-[#ebebeb] bg-white text-[#171717]">
+    <motion.div data-anime-reveal initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }} className="grid grid-cols-[28px_minmax(0,1fr)] gap-3 sm:grid-cols-[34px_minmax(0,1fr)] sm:gap-4">
+      <div className="mt-1 flex h-7 w-7 items-center justify-center rounded-full border border-[#ebebeb] bg-white text-[#171717] sm:h-8 sm:w-8">
         <Bot size={17} />
       </div>
-      <div className="min-w-0 text-[15px] leading-7 text-[#171717]">
+      <div className="min-w-0 text-sm leading-6 text-[#171717] sm:text-[15px] sm:leading-7">
         {message.content ? (
           <div className={clsx("whitespace-pre-wrap", isStreaming && "streaming-answer")}>
             {message.content}
@@ -556,7 +575,7 @@ function FollowUpChips({ prompts, onAsk, disabled }: { prompts: string[]; onAsk:
           data-anime-hover
           whileHover={{ y: -2 }}
           whileTap={{ scale: 0.98 }}
-          className="rounded-full border border-[#ebebeb] bg-white px-3 py-2 text-sm text-[#4d4d4d] transition hover:border-[#a1a1a1] hover:bg-[#f5f5f5] hover:text-[#171717] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full border border-[#ebebeb] bg-white px-3 py-2 text-xs text-[#4d4d4d] transition hover:border-[#a1a1a1] hover:bg-[#f5f5f5] hover:text-[#171717] disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
         >
           {prompt}
         </motion.button>
@@ -582,7 +601,7 @@ function SourcesPanel({ open, sources, onClose }: { open: boolean; sources: Sour
   if (!open) return null;
 
   return (
-    <aside className="hidden w-80 shrink-0 flex-col border-l border-[#ebebeb] bg-white xl:flex">
+    <aside className="fixed inset-y-0 right-0 z-40 flex w-[min(22rem,calc(100vw-1rem))] shrink-0 flex-col border-l border-[#ebebeb] bg-white shadow-[0_18px_60px_#0000002b] xl:static xl:z-auto xl:w-80 xl:shadow-none">
       <div className="flex h-14 items-center justify-between border-b border-[#ebebeb] px-4">
         <div className="flex items-center gap-2">
           <FileSearch size={17} className="text-[#0070f3]" />

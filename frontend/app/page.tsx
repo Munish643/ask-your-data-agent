@@ -65,7 +65,7 @@ export default function LandingPage() {
   return (
     <main data-anime-page className="min-h-screen bg-[#070A12] text-white">
       <section
-        className="relative min-h-[92vh] overflow-hidden bg-cover bg-center"
+        className="relative min-h-[92dvh] overflow-hidden bg-cover bg-center"
         style={{ backgroundImage: "url('/images/hero-knowledge-graph.png')" }}
       >
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,10,18,0.98)_0%,rgba(7,10,18,0.8)_36%,rgba(7,10,18,0.36)_72%,rgba(7,10,18,0.12)_100%)]" />
@@ -105,7 +105,7 @@ export default function LandingPage() {
           </div>
         </motion.nav>
 
-        <div className="relative z-10 flex min-h-[92vh] items-center px-5 py-16 md:px-10">
+        <div className="relative z-10 flex min-h-[92dvh] items-center px-5 pb-12 pt-28 sm:pt-24 md:px-10">
           <motion.div data-anime-reveal className="max-w-4xl" variants={container} initial="hidden" animate="show">
             <motion.div
               variants={item}
@@ -115,20 +115,20 @@ export default function LandingPage() {
               Enterprise RAG MVP
             </motion.div>
 
-            <motion.h1 variants={item} className="max-w-4xl text-[clamp(3.4rem,7vw,6.9rem)] font-semibold leading-[1.03] tracking-normal">
+            <motion.h1 variants={item} className="max-w-4xl text-4xl font-semibold leading-[1.05] tracking-normal sm:text-5xl md:text-6xl xl:text-7xl">
               Ask your company data. Get source-backed answers in seconds.
             </motion.h1>
 
-            <motion.p variants={item} className="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+            <motion.p variants={item} className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:mt-6 sm:text-lg sm:leading-8">
               Upload documents, index knowledge, stream answers, and keep every response scoped to tenant permissions,
               citations, audit logs, and usage records.
             </motion.p>
 
-            <motion.div variants={item} className="mt-8 flex flex-wrap gap-3">
+            <motion.div variants={item} className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/signup"
-                  className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#f97316] px-5 text-sm font-semibold text-white transition hover:bg-orange-500"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#f97316] px-5 text-sm font-semibold text-white transition hover:bg-orange-500 sm:w-auto"
                 >
                   Create account
                   <UserPlus size={18} />
@@ -137,7 +137,7 @@ export default function LandingPage() {
               <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   href="/login"
-                  className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/15 bg-white/5 px-5 text-sm font-semibold text-slate-100 transition hover:bg-white/10"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-5 text-sm font-semibold text-slate-100 transition hover:bg-white/10 sm:w-auto"
                 >
                   Log in
                   <LogIn size={18} />

@@ -57,6 +57,7 @@ html.dark {
 html,
 body {
   min-height: 100%;
+  overflow-x: hidden;
   background: var(--theme-canvas-soft);
 }
 
@@ -68,8 +69,16 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 ::selection {
@@ -338,5 +347,13 @@ html.dark .shadow-\[0_1px_1px_\#00000008\,0_2px_2px_\#0000000a\] {
   .skeleton::after,
   .page-fade-in {
     animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }

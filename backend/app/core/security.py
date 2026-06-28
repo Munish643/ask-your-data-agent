@@ -37,6 +37,9 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> Current
     if token_user:
         return token_user
 
+    if not settings.auth_allow_dev_fallback:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Log in to access this workspace")
+
     user = db.get(User, UUID(settings.dev_user_id))
     tenant = db.get(Tenant, UUID(settings.dev_tenant_id))
     if not user or not tenant:

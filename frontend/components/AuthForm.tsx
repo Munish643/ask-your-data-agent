@@ -49,7 +49,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
   const reduceMotion = useReducedMotion();
   const [name, setName] = useState("");
   const [workspace, setWorkspace] = useState("Demo workspace");
-  const [email, setEmail] = useState("admin@example.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,9 +82,15 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
     setIsSubmitting(true);
     setError(null);
 
-    const cleanEmail = email.trim() || "admin@example.com";
+    const cleanEmail = email.trim();
+    if (!cleanEmail) {
+      setError("Enter your email address to open a workspace.");
+      setIsSubmitting(false);
+      return;
+    }
+
     const cleanName = mode === "signup" && name.trim() ? name.trim() : getNameFromEmail(cleanEmail);
-    const cleanWorkspace = mode === "signup" && workspace.trim() ? workspace.trim() : "Demo workspace";
+    const cleanWorkspace = workspace.trim() ? workspace.trim() : "Demo workspace";
 
     try {
       const session = await api.createAuthSession({
@@ -110,7 +116,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    openWorkspace("password");
+    void openWorkspace("password");
   }
 
   return (
@@ -163,21 +169,21 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
           </div>
         </section>
 
-        <section className="flex min-h-screen items-center justify-center px-5 py-8 md:px-8">
+        <section className="flex min-h-screen items-center justify-center px-4 py-6 sm:px-5 md:px-8">
           <motion.div
             data-anime-reveal
             variants={formVariants}
             initial="hidden"
             animate="show"
-            className="w-full max-w-md rounded-lg border border-[#ebebeb] bg-white p-6 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]"
+            className="w-full max-w-md rounded-lg border border-[#ebebeb] bg-white p-4 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] sm:p-6"
           >
-            <motion.div variants={fieldVariants} className="mb-8">
+            <motion.div variants={fieldVariants} className="mb-6 sm:mb-8">
               <Link href="/" data-anime-hover className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-[#4d4d4d] transition hover:text-[#171717] lg:hidden">
                 <BookOpen size={18} />
                 Ask-Your-Data
               </Link>
               <div className="mb-3 font-mono text-xs uppercase tracking-normal text-[#888888]">{copy.eyebrow}</div>
-              <h2 className="text-3xl font-semibold tracking-normal text-[#171717]">{copy.title}</h2>
+              <h2 className="text-2xl font-semibold tracking-normal text-[#171717] sm:text-3xl">{copy.title}</h2>
               <p className="mt-3 text-sm leading-6 text-[#4d4d4d]">{copy.body}</p>
             </motion.div>
 
@@ -203,22 +209,22 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
                       />
                     </span>
                   </motion.label>
-
-                  <motion.label variants={fieldVariants} className="block">
-                    <span className="mb-2 block text-sm font-medium text-[#171717]">Workspace</span>
-                    <span className="flex h-11 items-center gap-3 rounded-md border border-[#ebebeb] bg-white px-3 transition focus-within:border-[#a1a1a1]">
-                      <Building2 size={18} className="text-[#888888]" />
-                      <input
-                        value={workspace}
-                        onChange={(event) => setWorkspace(event.target.value)}
-                        className="min-w-0 flex-1 bg-transparent text-sm text-[#171717] outline-none placeholder:text-[#888888]"
-                        placeholder="Acme knowledge"
-                        autoComplete="organization"
-                      />
-                    </span>
-                  </motion.label>
                 </>
               ) : null}
+
+              <motion.label variants={fieldVariants} className="block">
+                <span className="mb-2 block text-sm font-medium text-[#171717]">Workspace</span>
+                <span className="flex h-11 items-center gap-3 rounded-md border border-[#ebebeb] bg-white px-3 transition focus-within:border-[#a1a1a1]">
+                  <Building2 size={18} className="text-[#888888]" />
+                  <input
+                    value={workspace}
+                    onChange={(event) => setWorkspace(event.target.value)}
+                    className="min-w-0 flex-1 bg-transparent text-sm text-[#171717] outline-none placeholder:text-[#888888]"
+                    placeholder="Demo workspace"
+                    autoComplete="organization"
+                  />
+                </span>
+              </motion.label>
 
               <motion.label variants={fieldVariants} className="block">
                 <span className="mb-2 block text-sm font-medium text-[#171717]">Email</span>
@@ -254,7 +260,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               </motion.label>
 
               <motion.div variants={fieldVariants} className="rounded-md border border-[#ffefcf] bg-[#fff8ea] p-3 text-xs leading-5 text-[#ab570a]">
-                Demo auth creates separate backend users by email and workspace, then stores a signed API session token in this browser.
+                Each email and workspace opens a separate signed backend session. Use SSO here for the demo flow; connect OIDC/Cognito when you attach a real identity provider.
               </motion.div>
 
               <motion.button

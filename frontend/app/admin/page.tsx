@@ -41,13 +41,15 @@ export default function AdminPage() {
           ) : stats?.users.length ? (
             <div className="divide-y divide-[#ebebeb]">
               {stats.users.map((user) => (
-                <div key={user.id} className="grid gap-3 p-4 md:grid-cols-[1fr_auto_auto] md:items-center">
-                  <div>
+                <div key={user.id} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center md:grid-cols-[1fr_auto_auto]">
+                  <div className="min-w-0">
                     <div className="text-sm font-medium text-[#171717]">{user.name}</div>
-                    <div className="mt-1 font-mono text-xs text-[#888888]">{user.email}</div>
+                    <div className="mt-1 break-all font-mono text-xs text-[#888888]">{user.email}</div>
                   </div>
-                  <span className="rounded-full border border-[#ebebeb] bg-[#fafafa] px-2.5 py-1 font-mono text-xs text-[#4d4d4d]">{user.role}</span>
-                  <StatusBadge status={user.status} />
+                  <span className="w-fit rounded-full border border-[#ebebeb] bg-[#fafafa] px-2.5 py-1 font-mono text-xs text-[#4d4d4d] sm:justify-self-end">{user.role}</span>
+                  <div className="sm:justify-self-end">
+                    <StatusBadge status={user.status} />
+                  </div>
                 </div>
               ))}
             </div>

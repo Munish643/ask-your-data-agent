@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     fallback_keyword_overlap_min: int = 1
     auth_token_secret: str = "dev-change-me-session-secret"
     auth_token_ttl_seconds: int = 86400
+    auth_allow_dev_fallback: bool = False
 
     dev_tenant_id: str = "00000000-0000-0000-0000-000000000001"
     dev_user_id: str = "00000000-0000-0000-0000-000000000001"

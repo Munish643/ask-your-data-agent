@@ -19,9 +19,10 @@ declare global {
   }
 }
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const DEFAULT_REQUEST_TIMEOUT_MS = 15000;
 const UPLOAD_REQUEST_TIMEOUT_MS = 120000;
+const API_PORT = "8000";
 
 type ApiRequestInit = RequestInit & {
   timeoutMs?: number;
@@ -30,12 +31,34 @@ type ApiRequestInit = RequestInit & {
 function getApiBaseUrl() {
   if (typeof window !== "undefined") {
     const runtimeBaseUrl = window.__ASKDATA_CONFIG__?.apiBaseUrl?.trim();
-    if (runtimeBaseUrl) {
+    if (runtimeBaseUrl && !shouldUseCurrentHost(runtimeBaseUrl)) {
       return runtimeBaseUrl;
     }
+
+    const configuredBaseUrl = API_BASE_URL.trim();
+    if (configuredBaseUrl && !shouldUseCurrentHost(configuredBaseUrl)) {
+      return configuredBaseUrl;
+    }
+
+    return `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
   }
 
   return API_BASE_URL;
+}
+
+function shouldUseCurrentHost(apiBaseUrl: string) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    const url = new URL(apiBaseUrl);
+    const pageHost = window.location.hostname;
+    const apiHost = url.hostname;
+    return apiHost === "localhost" && pageHost !== "localhost" && pageHost !== "127.0.0.1";
+  } catch {
+    return false;
+  }
 }
 
 async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
@@ -56,6 +79,9 @@ async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
     });
     if (!response.ok) {
       const detail = await response.text();
+      if (response.status === 401) {
+        throw new Error("Please log in again. Your session is missing or expired.");
+      }
       throw new Error(detail || `Request failed with ${response.status}`);
     }
     return response.json() as Promise<T>;

@@ -117,9 +117,9 @@ export default function KnowledgeBasePage() {
   return (
     <AppShell title="Knowledge Base" subtitle="Upload and manage tenant-scoped documents for retrieval.">
       {error ? <div className="mb-4 rounded-md border border-[#f7d4d6] bg-[#fff5f5] p-4 text-sm text-[#c50000]">{error}</div> : null}
-      <section className="mb-6 rounded-lg border border-[#ebebeb] bg-white p-5 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]" aria-busy={isUploading}>
+      <section className="mb-5 rounded-lg border border-[#ebebeb] bg-white p-4 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] sm:mb-6 sm:p-5" aria-busy={isUploading}>
         <form onSubmit={upload} className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
-          <label className="flex min-h-28 cursor-pointer flex-col justify-center rounded-lg border border-dashed border-[#ebebeb] bg-[#fafafa] px-5 transition hover:border-[#a1a1a1]">
+          <label className="flex min-h-28 cursor-pointer flex-col justify-center rounded-lg border border-dashed border-[#ebebeb] bg-[#fafafa] px-4 py-4 transition hover:border-[#a1a1a1] sm:px-5">
             <div className="mb-2 flex items-center gap-3 text-sm font-medium text-[#171717]">
               <UploadCloud size={20} className="text-[#0070f3]" />
               {files.length ? `${files.length} file${files.length === 1 ? "" : "s"} selected` : "Choose TXT, MD, PDF, or DOCX files"}
@@ -130,7 +130,7 @@ export default function KnowledgeBasePage() {
           <button
             type="submit"
             disabled={!files.length || isUploading}
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-[#171717] px-5 text-sm font-medium text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[#171717] px-5 text-sm font-medium text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-50 lg:w-auto"
           >
             {isUploading ? <Loader2 size={18} className="animate-spin" /> : <FilePlus2 size={18} />}
             {isUploading ? "Uploading" : files.length > 1 ? `Upload ${files.length}` : "Upload"}
@@ -138,7 +138,7 @@ export default function KnowledgeBasePage() {
         </form>
         {files.length ? (
           <div className="mt-4 rounded-md border border-[#ebebeb] bg-[#fafafa]">
-            <div className="flex items-center justify-between border-b border-[#ebebeb] px-4 py-3">
+            <div className="flex items-center justify-between gap-3 border-b border-[#ebebeb] px-3 py-3 sm:px-4">
               <div className="text-sm font-medium text-[#171717]">Selected files</div>
               <button
                 type="button"
@@ -152,7 +152,7 @@ export default function KnowledgeBasePage() {
             </div>
             <div className="divide-y divide-[#ebebeb]">
               {files.map((selectedFile, index) => (
-                <div key={`${selectedFile.name}-${selectedFile.lastModified}-${index}`} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div key={`${selectedFile.name}-${selectedFile.lastModified}-${index}`} className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-[#171717]">{selectedFile.name}</div>
                     <div className="mt-1 font-mono text-xs text-[#888888]">{formatBytes(selectedFile.size)}</div>
@@ -190,15 +190,17 @@ export default function KnowledgeBasePage() {
         ) : documents.length ? (
           <div className="divide-y divide-[#ebebeb]">
             {documents.map((document) => (
-              <div key={document.id} className="grid gap-4 p-4 md:grid-cols-[1fr_auto_auto] md:items-center">
+              <div key={document.id} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center md:grid-cols-[1fr_auto_auto] md:gap-4">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-medium text-[#171717]">{document.title}</div>
                   <div className="mt-1 truncate font-mono text-xs text-[#888888]">
                     {document.file_name} - {new Date(document.created_at).toLocaleString()}
                   </div>
                 </div>
-                <StatusBadge status={document.status} />
-                <div className="flex gap-2">
+                <div className="justify-self-start sm:justify-self-end">
+                  <StatusBadge status={document.status} />
+                </div>
+                <div className="flex gap-2 sm:justify-self-end">
                   <button
                     onClick={() => reindex(document.id)}
                     disabled={Boolean(pendingDocumentId)}
