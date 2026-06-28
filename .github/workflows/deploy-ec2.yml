@@ -18,15 +18,42 @@ jobs:
 
     steps:
       - name: Configure SSH key
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
+          set -euo pipefail
+
+          if [ -z "${EC2_HOST}" ]; then
+            echo "::error title=Missing EC2_HOST secret::Set EC2_HOST to your EC2 public IP or public DNS."
+            exit 1
+          fi
+
+          if [ -z "${EC2_SSH_KEY}" ]; then
+            echo "::error title=Missing EC2_SSH_KEY secret::Set EC2_SSH_KEY to the full contents of your .pem private key."
+            exit 1
+          fi
+
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2_deploy_key
+          printf '%s' "${EC2_SSH_KEY}" | sed 's/\\n/\n/g' > ~/.ssh/ec2_deploy_key
+          printf '\n' >> ~/.ssh/ec2_deploy_key
           chmod 600 ~/.ssh/ec2_deploy_key
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keygen -y -f ~/.ssh/ec2_deploy_key > /dev/null
+
+          if ! ssh-keyscan -H -T 30 "${EC2_HOST}" >> ~/.ssh/known_hosts; then
+            echo "::error title=EC2 SSH is not reachable::GitHub Actions could not reach port 22 on ${EC2_HOST}. Check EC2_HOST and allow SSH from the GitHub runner, or deploy with a self-hosted runner on EC2."
+            exit 1
+          fi
 
       - name: Deploy on EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
         run: |
-          ssh -i ~/.ssh/ec2_deploy_key "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" <<'EOF'
+          set -euo pipefail
+          EC2_USER="${EC2_USER:-ubuntu}"
+
+          ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4 -i ~/.ssh/ec2_deploy_key "${EC2_USER}@${EC2_HOST}" <<'EOF'
             set -euo pipefail
 
             APP_DIR="$HOME/ask-your-data-agent"
@@ -41,10 +68,12 @@ jobs:
             git reset --hard origin/main
 
             if docker info >/dev/null 2>&1; then
-              docker compose up --build -d
+              docker compose up --build -d --remove-orphans
+              docker compose ps
               docker image prune -f
             else
-              sudo docker compose up --build -d
+              sudo docker compose up --build -d --remove-orphans
+              sudo docker compose ps
               sudo docker image prune -f
             fi
           EOF
