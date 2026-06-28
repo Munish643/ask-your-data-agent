@@ -11,4 +11,5 @@ __pycache__/
 .ruff_cache/
 storage/
 *.log
+*.tsbuildinfo
 .DS_Store

@@ -15,5 +15,11 @@ celery_app.conf.update(
     result_serializer="json",
     accept_content=["json"],
     timezone="UTC",
+    broker_connection_timeout=5,
+    broker_transport_options={"socket_timeout": 5, "socket_connect_timeout": 5},
+    task_publish_retry=False,
+    task_acks_late=True,
+    task_soft_time_limit=240,
+    task_time_limit=300,
     worker_prefetch_multiplier=1,
 )

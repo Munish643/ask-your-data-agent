@@ -18,6 +18,12 @@ declare global {
 }
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+const DEFAULT_REQUEST_TIMEOUT_MS = 15000;
+const UPLOAD_REQUEST_TIMEOUT_MS = 120000;
+
+type ApiRequestInit = RequestInit & {
+  timeoutMs?: number;
+};
 
 function getApiBaseUrl() {
   if (typeof window !== "undefined") {
@@ -30,27 +36,43 @@ function getApiBaseUrl() {
   return API_BASE_URL;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${getApiBaseUrl()}${path}`, {
-    ...init,
-    headers: {
-      ...(init?.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
-      ...init?.headers
-    },
-    cache: "no-store"
-  });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(detail || `Request failed with ${response.status}`);
+async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
+  const { timeoutMs = DEFAULT_REQUEST_TIMEOUT_MS, ...fetchInit } = init ?? {};
+  const controller = new AbortController();
+  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(`${getApiBaseUrl()}${path}`, {
+      ...fetchInit,
+      headers: {
+        ...(fetchInit.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+        ...fetchInit.headers
+      },
+      cache: "no-store",
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(detail || `Request failed with ${response.status}`);
+    }
+    return response.json() as Promise<T>;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("The server did not respond in time. Check backend and worker logs, then try again.");
+    }
+    throw error;
+  } finally {
+    globalThis.clearTimeout(timeout);
   }
-  return response.json() as Promise<T>;
 }
 
 export const api = {
   stats: () => request<AdminStats>("/api/admin/stats"),
   documents: () => request<DocumentItem[]>("/api/documents"),
-  uploadDocument: (formData: FormData) => request<DocumentItem>("/api/documents/upload", { method: "POST", body: formData }),
-  uploadDocuments: (formData: FormData) => request<DocumentItem[]>("/api/documents/upload-batch", { method: "POST", body: formData }),
+  uploadDocument: (formData: FormData) =>
+    request<DocumentItem>("/api/documents/upload", { method: "POST", body: formData, timeoutMs: UPLOAD_REQUEST_TIMEOUT_MS }),
+  uploadDocuments: (formData: FormData) =>
+    request<DocumentItem[]>("/api/documents/upload-batch", { method: "POST", body: formData, timeoutMs: UPLOAD_REQUEST_TIMEOUT_MS }),
   deleteDocument: (id: string) => request<{ status: string }>(`/api/documents/${id}`, { method: "DELETE" }),
   reindexDocument: (id: string) => request<DocumentItem>(`/api/documents/${id}/reindex`, { method: "POST" }),
   sessions: () => request<ChatSession[]>("/api/chat/sessions"),

@@ -102,6 +102,7 @@ class DocumentService:
         db.commit()
         db.refresh(document)
         self._enqueue_ingestion(db, document.id)
+        db.refresh(document)
         return document
 
     def delete_document(self, db: Session, *, tenant_id: UUID, user_id: UUID, document_id: UUID) -> None:
@@ -144,6 +145,7 @@ class DocumentService:
         db.commit()
         db.refresh(document)
         self._enqueue_ingestion(db, document.id)
+        db.refresh(document)
         return document
 
     def _enqueue_ingestion(self, db: Session, document_id: UUID) -> None:
@@ -154,10 +156,25 @@ class DocumentService:
         try:
             from app.workers.ingestion_tasks import ingest_document
 
-            ingest_document.delay(str(document_id))
-        except Exception:
-            # The worker is optional during API-only local development. The queued job remains visible.
-            pass
+            ingest_document.apply_async(args=[str(document_id)], retry=False)
+        except Exception as exc:  # noqa: BLE001 - broker exceptions vary by transport.
+            self._mark_enqueue_failed(db, document_id=document_id, error=exc)
+
+    def _mark_enqueue_failed(self, db: Session, *, document_id: UUID, error: Exception) -> None:
+        document = db.get(Document, document_id)
+        if not document:
+            return
+
+        document.status = "failed"
+        job = db.scalar(
+            select(SyncJob)
+            .where(SyncJob.document_id == document_id, SyncJob.status.in_(["queued", "processing"]))
+            .order_by(SyncJob.created_at.desc())
+        )
+        if job:
+            job.status = "failed"
+            job.error_message = f"Could not queue ingestion task: {error}"
+        db.commit()
 
     @staticmethod
     def _safe_file_name(file_name: str) -> str:
