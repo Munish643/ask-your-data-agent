@@ -116,7 +116,7 @@ export const api = {
 };
 
 export async function streamChat(
-  input: { query: string; session_id?: string | null; edited_message_id?: string | null },
+  input: { query: string; session_id?: string | null; edited_message_id?: string | null; web_search?: boolean },
   onEvent: (event: ChatStreamEvent) => void
 ): Promise<void> {
   const response = await fetch(`${getApiBaseUrl()}/api/chat/stream`, {
@@ -160,6 +160,7 @@ function parseSseEvent(raw: string): ChatStreamEvent | null {
       title: String(data.title),
       score: Number(data.score),
       source_type: String(data.source_type ?? "upload"),
+      source_uri: data.source_uri ? String(data.source_uri) : null,
       snippet: String(data.snippet)
     };
   }

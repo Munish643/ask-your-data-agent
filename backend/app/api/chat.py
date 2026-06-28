@@ -20,6 +20,7 @@ from app.services.audit_service import write_audit_log, write_usage_log
 from app.services.embedding_service import EmbeddingService
 from app.services.gemini_service import GeminiService, RetrievedSource
 from app.services.retrieval_service import RetrievalContext, RetrievalService
+from app.services.web_search_service import WebSearchService
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -32,6 +33,7 @@ class ChatStreamRequest(BaseModel):
     query: str = Field(min_length=1, max_length=4000)
     session_id: UUID | None = None
     edited_message_id: UUID | None = None
+    web_search: bool = False
 
 
 @router.post("/sessions", response_model=ChatSessionRead)
@@ -93,6 +95,8 @@ async def stream_chat(payload: ChatStreamRequest, current_user: CurrentUser = De
         emitted_sources: list[RetrievedSource] = []
         try:
             clean_query = payload.query.strip()
+            is_general_message = _is_general_chat_message(clean_query)
+            answer_mode = "general" if is_general_message else "knowledge"
             session = _resolve_session(db, payload, current_user)
             if payload.edited_message_id:
                 user_message = _apply_message_edit(
@@ -119,46 +123,54 @@ async def stream_chat(payload: ChatStreamRequest, current_user: CurrentUser = De
             await asyncio.sleep(0)
             yield _sse("status", {"message": "Checking access..."})
             await asyncio.sleep(0)
-            yield _sse("status", {"message": "Searching indexed knowledge..."})
 
-            step_started = time.perf_counter()
-            query_embedding = EmbeddingService().embed_query(clean_query)
-            timings["embedding_ms"] = int((time.perf_counter() - step_started) * 1000)
-            yield _sse("status", {"message": f"Embedded query in {timings['embedding_ms']} ms"})
-            await asyncio.sleep(0)
-
-            step_started = time.perf_counter()
-            emitted_sources = RetrievalService().search(
-                db,
-                context=RetrievalContext(tenant_id=current_user.tenant_id, role=current_user.role),
-                query=clean_query,
-                query_embedding=query_embedding,
-            )
-            timings["retrieval_ms"] = int((time.perf_counter() - step_started) * 1000)
-            yield _sse("status", {"message": f"Searched knowledge in {timings['retrieval_ms']} ms"})
-            await asyncio.sleep(0)
-            if not emitted_sources:
-                yield _sse("status", {"message": "No sufficiently relevant indexed sources found."})
+            if is_general_message:
+                yield _sse("status", {"message": "Preparing a friendly response..."})
                 await asyncio.sleep(0)
-            for source in emitted_sources:
-                yield _sse(
-                    "source",
-                    {
-                        "document_id": source.document_id,
-                        "title": source.title,
-                        "score": source.score,
-                        "source_type": "upload",
-                        "snippet": source.snippet,
-                    },
+            else:
+                yield _sse("status", {"message": "Searching indexed knowledge..."})
+
+                step_started = time.perf_counter()
+                query_embedding = EmbeddingService().embed_query(clean_query)
+                timings["embedding_ms"] = int((time.perf_counter() - step_started) * 1000)
+                yield _sse("status", {"message": f"Embedded query in {timings['embedding_ms']} ms"})
+                await asyncio.sleep(0)
+
+                step_started = time.perf_counter()
+                emitted_sources = RetrievalService().search(
+                    db,
+                    context=RetrievalContext(tenant_id=current_user.tenant_id, role=current_user.role),
+                    query=clean_query,
+                    query_embedding=query_embedding,
                 )
+                timings["retrieval_ms"] = int((time.perf_counter() - step_started) * 1000)
+                yield _sse("status", {"message": f"Searched knowledge in {timings['retrieval_ms']} ms"})
+                await asyncio.sleep(0)
+                if not emitted_sources:
+                    yield _sse("status", {"message": "No sufficiently relevant indexed sources found."})
+                    await asyncio.sleep(0)
+
+            if payload.web_search and not is_general_message:
+                answer_mode = "web"
+                yield _sse("status", {"message": "Searching the web..."})
+                await asyncio.sleep(0)
+                step_started = time.perf_counter()
+                web_sources = await asyncio.to_thread(WebSearchService().search, clean_query)
+                timings["web_search_ms"] = int((time.perf_counter() - step_started) * 1000)
+                emitted_sources.extend(web_sources)
+                yield _sse("status", {"message": f"Found {len(web_sources)} web source{'' if len(web_sources) == 1 else 's'}"})
                 await asyncio.sleep(0)
 
-            yield _sse("status", {"message": "Reranking sources..."})
+            for source in emitted_sources:
+                yield _sse("source", _source_payload(source))
+                await asyncio.sleep(0)
+
+            yield _sse("status", {"message": "Reranking sources..." if emitted_sources else "Preparing answer..."})
             await asyncio.sleep(0)
             yield _sse("status", {"message": "Generating answer with Gemini..."})
 
             step_started = time.perf_counter()
-            for delta in GeminiService().stream_answer(query=clean_query, sources=emitted_sources):
+            for delta in GeminiService().stream_answer(query=clean_query, sources=emitted_sources, mode=answer_mode):
                 answer_parts.append(delta)
                 yield _sse("answer_delta", {"text": delta})
                 await asyncio.sleep(0)
@@ -187,7 +199,12 @@ async def stream_chat(payload: ChatStreamRequest, current_user: CurrentUser = De
                 action="chat.query",
                 resource_type="chat_session",
                 resource_id=str(session.id),
-                metadata={"source_count": len(emitted_sources), "mode": "gemini" if settings.gemini_api_key else "mock"},
+                metadata={
+                    "source_count": len(emitted_sources),
+                    "answer_mode": answer_mode,
+                    "web_search": payload.web_search,
+                    "mode": "gemini" if settings.gemini_api_key else "mock",
+                },
             )
             write_usage_log(
                 db,
@@ -201,6 +218,8 @@ async def stream_chat(payload: ChatStreamRequest, current_user: CurrentUser = De
                     "provider": "gemini",
                     "mock_mode": not bool(settings.gemini_api_key),
                     "source_count": len(emitted_sources),
+                    "answer_mode": answer_mode,
+                    "web_search": payload.web_search,
                     "timings": timings,
                 },
             )
@@ -296,5 +315,22 @@ def _source_payload(source: RetrievedSource) -> dict[str, Any]:
         "title": source.title,
         "source_uri": source.source_uri,
         "score": source.score,
+        "source_type": source.source_type,
         "snippet": source.snippet,
+    }
+
+
+def _is_general_chat_message(query: str) -> bool:
+    normalized = " ".join(query.lower().strip(" .!?").split())
+    if normalized in {"hi", "hello", "hey", "hii", "hiii", "yo", "thanks", "thank you"}:
+        return True
+    if normalized.startswith(("hi ", "hello ", "hey ")):
+        return len(normalized.split()) <= 5
+    return normalized in {
+        "who are you",
+        "what are you",
+        "what can you do",
+        "how can you help",
+        "how can you help me",
+        "what can you help me with",
     }

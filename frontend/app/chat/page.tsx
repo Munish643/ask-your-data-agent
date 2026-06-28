@@ -5,7 +5,9 @@ import { motion } from "motion/react";
 import {
   Bot,
   Check,
+  ExternalLink,
   FileSearch,
+  Globe2,
   History,
   MessageSquarePlus,
   PanelLeftClose,
@@ -51,6 +53,7 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false);
   const [activeAssistantId, setActiveAssistantId] = useState<string | null>(null);
   const [streamCompletionTick, setStreamCompletionTick] = useState(0);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -186,7 +189,7 @@ export default function ChatPage() {
     setIsStreaming(true);
 
     try {
-      await streamChat({ query: cleanQuery, session_id: activeSessionId, edited_message_id: options.editedMessageId }, (event) => {
+      await streamChat({ query: cleanQuery, session_id: activeSessionId, edited_message_id: options.editedMessageId, web_search: webSearchEnabled }, (event) => {
         if (event.type === "status") {
           setStatuses((current) => [...current, event.message]);
         }
@@ -311,15 +314,32 @@ export default function ChatPage() {
                 <span className="hidden sm:inline">New chat</span>
               </button>
             </div>
-            <button
-              onClick={() => setSourcesOpen((current) => !current)}
-              data-anime-hover
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
-            >
-              {sourcesOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
-              <span className="hidden sm:inline">Sources</span>
-              {sources.length ? <span className="rounded-full bg-[#d3e5ff] px-2 py-0.5 font-mono text-xs text-[#0761d1]">{sources.length}</span> : null}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setWebSearchEnabled((current) => !current)}
+                data-anime-hover
+                className={clsx(
+                  "inline-flex h-9 items-center gap-2 rounded-md border px-3 text-sm font-medium transition",
+                  webSearchEnabled
+                    ? "border-[#d3e5ff] bg-[#eef6ff] text-[#0761d1]"
+                    : "border-[#ebebeb] bg-white text-[#171717] hover:bg-[#f5f5f5]"
+                )}
+                title={webSearchEnabled ? "Web search is on" : "Turn on web search"}
+                aria-pressed={webSearchEnabled}
+              >
+                <Globe2 size={17} />
+                <span className="hidden sm:inline">Web</span>
+              </button>
+              <button
+                onClick={() => setSourcesOpen((current) => !current)}
+                data-anime-hover
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-[#ebebeb] bg-white px-3 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5]"
+              >
+                {sourcesOpen ? <PanelRightClose size={17} /> : <PanelRightOpen size={17} />}
+                <span className="hidden sm:inline">Sources</span>
+                {sources.length ? <span className="rounded-full bg-[#d3e5ff] px-2 py-0.5 font-mono text-xs text-[#0761d1]">{sources.length}</span> : null}
+              </button>
+            </div>
           </div>
 
           <div className="thin-scrollbar flex-1 overflow-y-auto">
@@ -369,6 +389,22 @@ export default function ChatPage() {
           <form onSubmit={submit} className="shrink-0 border-t border-[#ebebeb] bg-[#fafafa] px-2 py-3 sm:px-3 sm:py-4 md:px-6">
             <div className="mx-auto max-w-4xl">
               <div className="flex items-end gap-2 rounded-lg border border-[#ebebeb] bg-white p-2 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] focus-within:border-[#a1a1a1] sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setWebSearchEnabled((current) => !current)}
+                  data-anime-hover
+                  className={clsx(
+                    "hidden h-10 shrink-0 items-center gap-2 rounded-md border px-3 text-sm font-medium transition sm:inline-flex",
+                    webSearchEnabled
+                      ? "border-[#d3e5ff] bg-[#eef6ff] text-[#0761d1]"
+                      : "border-[#ebebeb] bg-white text-[#4d4d4d] hover:bg-[#f5f5f5] hover:text-[#171717]"
+                  )}
+                  aria-pressed={webSearchEnabled}
+                  title={webSearchEnabled ? "Web search is on" : "Turn on web search"}
+                >
+                  <Globe2 size={16} />
+                  Web
+                </button>
                 <textarea
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
@@ -387,7 +423,9 @@ export default function ChatPage() {
                   <Send size={18} />
                 </button>
               </div>
-              <div className="mt-2 hidden px-1 font-mono text-[11px] text-[#888888] sm:block">Enter sends. Shift + Enter adds a new line.</div>
+              <div className="mt-2 hidden px-1 font-mono text-[11px] text-[#888888] sm:block">
+                Enter sends. Shift + Enter adds a new line. {webSearchEnabled ? "Web search is on." : "Web search is off."}
+              </div>
             </div>
           </form>
         </section>
@@ -624,7 +662,20 @@ function SourcesPanel({ open, sources, onClose }: { open: boolean; sources: Sour
                   <h3 className="text-sm font-medium leading-5 text-[#171717]">{source.title}</h3>
                   <span className="rounded-full bg-[#d3e5ff] px-2 py-1 font-mono text-xs text-[#0761d1]">{Math.round(source.score * 100)}%</span>
                 </div>
-                <div className="mb-2 font-mono text-xs text-[#888888]">{source.source_type ?? "upload"}</div>
+                <div className="mb-2 flex flex-wrap items-center gap-2 font-mono text-xs text-[#888888]">
+                  <span>{source.source_type ?? "upload"}</span>
+                  {source.source_uri ? (
+                    <a
+                      href={source.source_uri}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[#0070f3] hover:text-[#0761d1]"
+                    >
+                      Open
+                      <ExternalLink size={12} />
+                    </a>
+                  ) : null}
+                </div>
                 <p className="text-sm leading-6 text-[#4d4d4d]">{source.snippet}</p>
               </div>
             ))}

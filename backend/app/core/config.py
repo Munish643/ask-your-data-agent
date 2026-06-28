@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     retrieval_source_content_chars: int = 1400
     retrieval_min_score: float = 0.2
     fallback_keyword_overlap_min: int = 1
+    web_search_enabled: bool = True
+    web_search_limit: int = 5
+    web_search_timeout_seconds: int = 8
     auth_token_secret: str = "dev-change-me-session-secret"
     auth_token_ttl_seconds: int = 86400
     auth_allow_dev_fallback: bool = False
