@@ -189,6 +189,7 @@ export default function ChatPage() {
     setIsStreaming(true);
 
     try {
+      let streamHadError = false;
       await streamChat({ query: cleanQuery, session_id: activeSessionId, edited_message_id: options.editedMessageId, web_search: webSearchEnabled }, (event) => {
         if (event.type === "status") {
           setStatuses((current) => [...current, event.message]);
@@ -210,11 +211,24 @@ export default function ChatPage() {
           loadSessions().catch(() => undefined);
         }
         if (event.type === "error") {
+          streamHadError = true;
           setError(event.message);
+          const currentAnswer = answerBuffersRef.current[assistantId] ?? "";
+          const earlyStopMessage = currentAnswer
+            ? "\n\nResponse stopped early before the full answer was returned. Please try again."
+            : "The response stopped before an answer was returned. Please try again.";
+          answerBuffersRef.current[assistantId] = `${currentAnswer}${earlyStopMessage}`;
         }
       });
+      if (streamHadError) {
+        setStatuses((current) => [...current, "Response stopped early"]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Streaming failed");
+      const currentAnswer = answerBuffersRef.current[assistantId] ?? "";
+      answerBuffersRef.current[assistantId] = currentAnswer
+        ? `${currentAnswer}\n\nResponse stopped early before the full answer was returned. Please try again.`
+        : "The response stopped before an answer was returned. Please try again.";
     } finally {
       streamFinishedRef.current[assistantId] = true;
       setStreamCompletionTick((current) => current + 1);

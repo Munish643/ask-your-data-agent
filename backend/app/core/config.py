@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     gemini_generation_model: str = "gemini-2.5-flash"
     gemini_embedding_model: str = "gemini-embedding-001"
     gemini_embedding_dimension: int = 768
-    gemini_max_output_tokens: int = 500
+    gemini_max_output_tokens: int = 2048
     llm_timeout_seconds: int = 30
-    llm_stream_timeout_seconds: int = 60
+    llm_stream_timeout_seconds: int = 180
     embedding_batch_size: int = 20
     retrieval_limit: int = 4
     retrieval_source_content_chars: int = 1400

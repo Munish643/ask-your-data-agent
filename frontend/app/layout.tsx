@@ -4,7 +4,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Ask-Your-Data Agent",
-  description: "Enterprise RAG assistant with source-backed streaming answers"
+  description: "Enterprise RAG assistant with source-backed streaming answers",
+  icons: {
+    icon: "/favicon.svg"
+  }
 };
 
 const themeScript = `

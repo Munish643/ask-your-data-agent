@@ -150,15 +150,23 @@ export async function streamChat(
       if (parsed) onEvent(parsed);
     }
   }
+
+  buffer += decoder.decode();
+  if (buffer.trim()) {
+    const parsed = parseSseEvent(buffer);
+    if (parsed) onEvent(parsed);
+  }
 }
 
 function parseSseEvent(raw: string): ChatStreamEvent | null {
-  const eventLine = raw.split("\n").find((line) => line.startsWith("event:"));
-  const dataLine = raw.split("\n").find((line) => line.startsWith("data:"));
-  if (!eventLine || !dataLine) return null;
+  const lines = raw.split(/\r?\n/);
+  const eventLine = lines.find((line) => line.startsWith("event:"));
+  const dataLines = lines.filter((line) => line.startsWith("data:"));
+  if (!eventLine || dataLines.length === 0) return null;
 
   const event = eventLine.replace("event:", "").trim();
-  const data = JSON.parse(dataLine.replace("data:", "").trim()) as Record<string, unknown>;
+  const dataText = dataLines.map((line) => line.replace(/^data:\s?/, "")).join("\n");
+  const data = JSON.parse(dataText) as Record<string, unknown>;
   if (event === "status") return { type: "status", message: String(data.message) };
   if (event === "source") {
     return {

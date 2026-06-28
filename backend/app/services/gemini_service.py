@@ -93,6 +93,7 @@ class GeminiService:
 
         for attempt in range(3):
             try:
+                finish_reason: str | None = None
                 stream = client.models.generate_content_stream(
                     model=settings.gemini_generation_model,
                     contents=prompt,
@@ -105,10 +106,13 @@ class GeminiService:
                 for chunk in stream:
                     if time.monotonic() > deadline:
                         raise TimeoutError("Gemini streaming request timed out")
-                    text = getattr(chunk, "text", None)
+                    finish_reason = self._chunk_finish_reason(chunk) or finish_reason
+                    text = self._chunk_text(chunk)
                     if text:
                         yielded_any = True
                         yield text
+                if finish_reason and finish_reason.upper() == "MAX_TOKENS":
+                    yield "\n\nNote: The answer reached the current output limit. Ask me to continue if you want more detail."
                 close = getattr(client, "close", None)
                 if callable(close):
                     close()
@@ -178,6 +182,35 @@ Instruction:
         if len(content) <= settings.retrieval_source_content_chars:
             return clipped
         return f"{clipped}\n[truncated]"
+
+    @staticmethod
+    def _chunk_text(chunk) -> str:
+        try:
+            text = getattr(chunk, "text", None)
+            if text:
+                return str(text)
+        except (AttributeError, TypeError, ValueError):
+            pass
+
+        texts: list[str] = []
+        for candidate in getattr(chunk, "candidates", None) or []:
+            content = getattr(candidate, "content", None)
+            for part in getattr(content, "parts", None) or []:
+                try:
+                    part_text = getattr(part, "text", None)
+                except (AttributeError, TypeError, ValueError):
+                    part_text = None
+                if part_text:
+                    texts.append(str(part_text))
+        return "".join(texts)
+
+    @staticmethod
+    def _chunk_finish_reason(chunk) -> str | None:
+        for candidate in getattr(chunk, "candidates", None) or []:
+            finish_reason = getattr(candidate, "finish_reason", None)
+            if finish_reason:
+                return str(getattr(finish_reason, "name", finish_reason))
+        return None
 
     def _mock_stream(self, *, query: str, sources: list[RetrievedSource], mode: str) -> Iterator[str]:
         if mode == "general":
