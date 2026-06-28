@@ -52,13 +52,13 @@ export default function ConnectorsPage() {
           const Icon = meta.icon;
           const isPending = pendingProvider === connector.provider;
           return (
-            <div key={connector.provider} className="rounded-lg border border-[#ebebeb] bg-white p-5 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a]">
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
+            <div key={connector.provider} className="rounded-lg border border-[#ebebeb] bg-white p-4 shadow-[0_1px_1px_#00000005,0_2px_2px_#0000000a] sm:p-5">
+              <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-md border border-[#ebebeb] bg-[#fafafa] text-[#0070f3]">
                     <Icon size={20} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h2 className="text-base font-semibold text-[#171717]">{meta.title}</h2>
                     <p className="mt-1 text-sm text-[#4d4d4d]">Source sync connector</p>
                   </div>
@@ -71,7 +71,7 @@ export default function ConnectorsPage() {
               <button
                 onClick={() => start(connector.provider)}
                 disabled={Boolean(pendingProvider)}
-                className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[#ebebeb] bg-white px-4 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-md border border-[#ebebeb] bg-white px-4 text-sm font-medium text-[#171717] transition hover:bg-[#f5f5f5] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {isPending ? <Loader2 size={15} className="animate-spin" /> : null}
                 Coming soon
