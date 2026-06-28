@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     database_max_overflow: int = 10
     redis_url: str = "redis://localhost:6379/0"
     cors_origins: str = "http://localhost:3000"
+    cors_origin_regex: str | None = r"https?://(?:localhost|127\.0\.0\.1|(?:\d{1,3}\.){3}\d{1,3})(?::3000)?"
     storage_dir: Path = Path("storage")
     ingestion_mode: str = "worker"
     max_upload_mb: int = 25
