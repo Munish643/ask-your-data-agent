@@ -22,7 +22,6 @@ declare global {
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 const DEFAULT_REQUEST_TIMEOUT_MS = 15000;
 const UPLOAD_REQUEST_TIMEOUT_MS = 120000;
-const API_PORT = "8000";
 
 type ApiRequestInit = RequestInit & {
   timeoutMs?: number;
@@ -40,7 +39,7 @@ function getApiBaseUrl() {
       return configuredBaseUrl;
     }
 
-    return `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
+    return "";
   }
 
   return API_BASE_URL;
