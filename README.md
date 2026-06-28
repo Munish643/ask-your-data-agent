@@ -58,6 +58,12 @@ For AWS Free Tier, use the single-EC2 Docker Compose guide:
 infra/aws-free-tier-deployment.md
 ```
 
+For automatic redeploys from GitHub to EC2 after every push:
+
+```text
+infra/github-actions-ec2-deploy.md
+```
+
 The fastest non-AWS hosted MVP path is Render using the included `render.yaml`:
 
 ```text
