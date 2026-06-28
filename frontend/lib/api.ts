@@ -55,10 +55,18 @@ function shouldUseCurrentHost(apiBaseUrl: string) {
     const url = new URL(apiBaseUrl);
     const pageHost = window.location.hostname;
     const apiHost = url.hostname;
-    return apiHost === "localhost" && pageHost !== "localhost" && pageHost !== "127.0.0.1";
+    if (apiHost === "localhost" && pageHost !== "localhost" && pageHost !== "127.0.0.1") {
+      return true;
+    }
+
+    return isIpv4Host(pageHost) && isIpv4Host(apiHost) && pageHost !== apiHost;
   } catch {
     return false;
   }
+}
+
+function isIpv4Host(hostname: string) {
+  return /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname);
 }
 
 async function request<T>(path: string, init?: ApiRequestInit): Promise<T> {
